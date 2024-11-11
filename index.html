@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Spin Wheel</title>
+    <style>
+      body {
+        background-color: #2c3e50;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: #ecf0f1;
+      }
+
+      .header {
+        padding: 40px;
+        color: #fff;
+        text-align: center;
+      }
+
+      .main-container {
+        display: flex;
+        justify-content: space-between;
+        width: 90%;
+        max-width: 1000px;
+      }
+
+      .wheel-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .wheel {
+        display: flex;
+        justify-content: center;
+        position: relative;
+        margin-bottom: 40px;
+      }
+
+      .center-circle {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background-color: #fff;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+      }
+      .center-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 18px;
+        font-weight: bold;
+        color: #e20707;
+        cursor: pointer;
+      }
+
+      .triangle {
+        width: 0;
+        height: 0;
+        border-top: 10px solid transparent;
+        border-bottom: 10px solid transparent;
+        border-right: 30px solid white;
+        position: absolute;
+        top: 50%;
+        right: -220%;
+        transform: translateY(-50%);
+      }
+
+      .side-panel {
+        width: 300px;
+        background-color: #2c3e50;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .side-panel h2 {
+        text-align: center;
+        color: #ecf0f1;
+        font-size: 20px;
+      }
+
+      .inputArea,
+      .controls {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+      }
+
+      .addButton,
+      .clearButton,
+      .submitButton {
+        margin: 5px;
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+      }
+
+      .addButton:hover,
+      .clearButton:hover,
+      .submitButton:hover {
+        background-color: #45a049;
+      }
+
+      .inputItem {
+        padding: 10px;
+        font-size: 16px;
+        width: 200px;
+      }
+
+      /* Phần danh sách các mục */
+      .itemList {
+        color: white;
+        text-align: center;
+        margin-top: 30px;
+        padding: 10px;
+        background-color: #2c3e50;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .itemList button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+        cursor: pointer;
+        padding: 12px 25px;
+        font-size: 16px;
+        margin: 8px;
+        border-radius: 8px;
+        transition: all 0.3s ease-in-out;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .itemList button:hover {
+        background-color: #2980b9;
+        transform: scale(1.1); 
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .itemList button.delete {
+        background-color: #e74c3c;
+      }
+
+      .itemList button.delete:hover {
+        background-color: #c0392b; 
+      }
+
+      .itemList button:focus {
+        outline: none;
+      }
+
+      .itemList h3 {
+        color: #ecf0f1;
+        font-size: 24px;
+        margin-bottom: 20px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      .itemList ul {
+        list-style: none;
+        padding: 0;
+      }
+      .itemList li {
+        background-color: #34495e;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 8px 0;
+        font-size: 18px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .itemList ul li {
+        background-color: #34495e;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 8px 0;
+        font-size: 18px;
+        color: #ecf0f1;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+      }
+
+      .itemList ul li:hover {
+        background-color: #16a085;
+        transform: translateX(10px); 
+      }
+
+
+      .itemList li span {
+        margin-right: 15px;
+        font-weight: bold;
+        color: #f39c12;
+      }
+
+      .itemList li.deleted {
+        background-color: #f39c12;
+        color: #fff;
+        opacity: 0.6;
+        transform: scale(0.95);
+      }
+
+      .notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: #28a745;
+        color: white;
+        padding: 15px;
+        font-size: 18px;
+        border-radius: 5px;
+        display: none;
+        z-index: 1000;
+        transition: all 0.3s ease;
+      }
+
+      .notification.show {
+        display: block;
+      }
+
+      .close-button {
+        color: white;
+        font-size: 22px;
+        font-weight: bold;
+        position: absolute;
+        top: 5px;
+        right: 10px;
+        cursor: pointer;
+      }
+
+      .close-button:hover {
+        color: #e74c3c;
+      }
+
+      .confirmation-buttons {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+      }
+      .confirmation-buttons button {
+        padding: 10px 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .confirmation-buttons .delete {
+        background-color: #e74c3c;
+      }
+      .confirmation-buttons .continue {
+        background-color: #4caf50;
+      }
+
+      .resultList {
+        margin-top: 30px;
+        color: white;
+        text-align: center;
+      }
+
+      .resultList span {
+        display: block;
+        margin: 5px;
+        font-size: 18px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1>Vòng Quay May Mắn</h1>
+    </div>
+
+    <div class="wheel">
+      <canvas id="canvas" width="500" height="500"></canvas>
+      <div class="center-circle" onclick="spin()">
+        <div class="triangle"></div>
+        <div class="center-text">CLICK TO SPIN</div>
+      </div>
+    </div>
+
+    <div class="side-panel">
+      <h2>Danh sách Mục</h2>
+      <div class="inputArea">
+        <input
+          type="text"
+          id="newItemInput"
+          class="inputItem"
+          placeholder="Enter new item"
+        />
+        <button class="submitButton" onclick="addNewItem()">Add Item</button>
+      </div>
+
+      <div class="controls">
+        <button class="clearButton" onclick="clearAllItems()">
+          Clear All Items
+        </button>
+        <button class="submitButton" onclick="sortItems()">Sort Items</button>
+      </div>
+
+      <div class="itemList" id="itemList"></div>
+
+      <div class="resultList" id="resultList"></div>
+
+      <div id="notification" class="notification">
+        <span id="closeNotification" class="close-button">&times;</span>
+        Notification message here...
+      </div>
+
+    <script>
+
+      function randomColor() {
+        return {
+          r: Math.floor(Math.random() * 255),
+          g: Math.floor(Math.random() * 255),
+          b: Math.floor(Math.random() * 255),
+        };
+      }
+
+      function toRad(deg) {
+        return deg * (Math.PI / 180.0);
+      }
+
+      function randomRange(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function easeOutSine(x) {
+        return Math.sin((x * Math.PI) / 2);
+      }
+
+      function getPercent(input, min, max) {
+        return ((input - min) * 100) / (max - min) / 100;
+      }
+
+
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+      const width = canvas.width;
+      const height = canvas.height;
+      const centerX = width / 2;
+      const centerY = height / 2;
+      const radius = width / 2;
+
+      let items = [
+        "TÝ",
+        "SỬU",
+        "DẦN",
+        "MẸO",
+        "THÌN",
+        "TỴ",
+        "NGỌ",
+        "MÙI",
+        "THÂN",
+        "DẬU",
+        "TUẤT",
+        "HỢI",
+      ];
+      let results = [];
+      let currentDeg = 0;
+      let step = 360 / (items.length || 1);
+      let colors = [];
+      let itemDegs = {};
+      let speed = 0;
+      let maxRotation = randomRange(360 * 3, 360 * 6);
+      let pause = false;
+
+      function shuffleItems() {
+        for (let i = items.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [items[i], items[j]] = [items[j], items[i]];
+        }
+        createWheel();
+        showNotification("Items shuffled!");
+      }
+
+      function createWheel() {
+        step = 360 / (items.length || 1);
+        colors = items.map(() => randomColor());
+        draw();
+        updateItemList();
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, toRad(0), toRad(360));
+        ctx.fillStyle = `rgb(33, 33, 33)`;
+        ctx.lineTo(centerX, centerY);
+        ctx.fill();
+
+        let startDeg = currentDeg;
+        items.forEach((item, i) => {
+          let endDeg = startDeg + step;
+          let color = colors[i];
+          ctx.beginPath();
+          ctx.arc(centerX, centerY, radius - 2, toRad(startDeg), toRad(endDeg));
+          ctx.fillStyle = `rgb(${color.r - 30}, ${color.g - 30}, ${
+            color.b - 30
+          })`;
+          ctx.lineTo(centerX, centerY);
+          ctx.fill();
+
+          ctx.save();
+          ctx.translate(centerX, centerY);
+          ctx.rotate(toRad(startDeg + step / 2));
+          ctx.fillStyle = "#ffffff";
+          ctx.font = "bold 14px Arial";
+          ctx.textAlign = "right";
+          ctx.textBaseline = "middle";
+          ctx.fillText(item, radius - 30, 0);
+          ctx.restore();
+
+          startDeg = endDeg;
+        });
+      }
+
+      function spin() {
+        if (speed !== 0 || items.length === 0) return;
+        currentDeg = 0;
+        maxRotation = randomRange(360 * 3, 360 * 6);
+        pause = false;
+        createWheel();
+        window.requestAnimationFrame(animate);
+      }
+
+      function animate() {
+        if (pause) return;
+        speed = easeOutSine(getPercent(currentDeg, maxRotation, 0)) * 20;
+        if (speed < 0.01) {
+          speed = 0;
+          pause = true;
+          handleSpinResult();
+        }
+        currentDeg += speed;
+        draw();
+        window.requestAnimationFrame(animate);
+      }
+
+      function handleSpinResult() {
+        const winningDeg = (360 - (currentDeg % 360)) % 360;
+        let winner = items[0];
+        let startDeg = 0;
+
+        for (let i = 0; i < items.length; i++) {
+          let endDeg = startDeg + step;
+          if (winningDeg >= startDeg && winningDeg < endDeg) {
+            winner = items[i];
+            break;
+          }
+          startDeg = endDeg;
+        }
+
+        showSpinResult(winner, winningDeg);
+      }
+
+      function showSpinResult(winner, winningDeg) {
+        const notification = document.getElementById("notification");
+        notification.innerHTML = `Congratulations! You won: <strong>${winner}</strong>`;
+        notification.classList.add("show");
+
+        const confirmationButtons = document.createElement("div");
+        confirmationButtons.classList.add("confirmation-buttons");
+        confirmationButtons.innerHTML = `
+          <button class="delete" onclick="deleteItem('${winner}')">Delete</button>
+          <button class="continue" onclick="continueSpinning()">Continue Spinning</button>
+        `;
+        notification.appendChild(confirmationButtons);
+      }
+
+      function continueSpinning() {
+        const notification = document.getElementById("notification");
+        notification.classList.remove("show");
+        spin();
+      }
+
+      function deleteItem(winner) {
+        items = items.filter((item) => item !== winner);
+        results.push(`Deleted: ${winner}`);
+        createWheel();
+        showNotification("Item deleted!");
+        const notification = document.getElementById("notification");
+        notification.classList.remove("show");
+      }
+
+      function sortItems() {
+        items.sort();
+        createWheel();
+        showNotification("Items sorted!");
+      }
+
+      function addNewItem() {
+        const input = document.getElementById("newItemInput");
+        if (!input.value.trim()) return;
+        items.push(input.value.trim());
+        input.value = "";
+        createWheel();
+        showNotification("Item added!");
+      }
+
+      function clearAllItems() {
+        items = [];
+        createWheel();
+        showNotification("All items cleared!");
+      }
+
+      function updateItemList() {
+        const itemList = document.getElementById("itemList");
+        itemList.innerHTML = items
+          .map(
+            (item, index) =>
+              `<span>${item}</span> <button onclick="deleteItem('${item}')">Delete</button>`
+          )
+          .join("<br>");
+      }
+
+      function showNotification(message) {
+        const notification = document.getElementById("notification");
+        notification.textContent = message;
+        notification.classList.add("show");
+        setTimeout(() => {
+          notification.classList.remove("show");
+        }, 3000);
+      }
+
+      function hideNotification() {
+        const notification = document.getElementById("notification");
+        notification.classList.remove("show");
+      }
+
+
+      document
+        .getElementById("newItemInput")
+        .addEventListener("keypress", (e) => {
+          if (e.key === "Enter") {
+            addNewItem();
+          }
+        });
+
+      document.getElementById("closeNotification").addEventListener("click", hideNotification);
+
+      createWheel();
+    </script>
+  </body>
+</html>
