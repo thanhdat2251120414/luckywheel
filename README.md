@@ -1,3 +1,3 @@
-# Spin-The-Wheel
+# Lucky-wheel
 HTML,CSS,JS
 
